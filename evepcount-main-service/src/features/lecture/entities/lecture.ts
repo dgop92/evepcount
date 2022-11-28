@@ -1,6 +1,7 @@
 import { LecturePhoto } from "./lecture-photo";
 import { PhotoPeopleCounting } from "./photo-people-counting";
 import Joi from "joi";
+import { SkipLimitPaginationSchema } from "@common/schemas/pagination";
 
 export interface Lecture {
   id: string;
@@ -10,6 +11,10 @@ export interface Lecture {
   peopleCountingPhotos?: PhotoPeopleCounting[];
 }
 
+export const LecturePaginationSchema = SkipLimitPaginationSchema.meta({
+  className: "LecturePagination",
+});
+
 export const LectureOptionsSchema = Joi.object({
   fetchPhotos: Joi.boolean().default(false),
   fetchPeopleCountingPhotos: Joi.boolean().default(false),
@@ -17,14 +22,14 @@ export const LectureOptionsSchema = Joi.object({
 
 export const LectureCreateInputSchema = Joi.object({
   data: Joi.object({
-    name: Joi.string().min(2).max(100).required(),
+    title: Joi.string().min(2).max(100).required(),
     description: Joi.string().min(2).max(1000).optional(),
   }).required(),
 }).meta({ className: "LectureCreateInput" });
 
 export const LectureUpdateInputSchema = Joi.object({
   data: Joi.object({
-    name: Joi.string().min(2).max(100).optional(),
+    title: Joi.string().min(2).max(100).optional(),
     description: Joi.string().min(2).max(1000).optional(),
   }).required(),
   searchBy: Joi.object({
@@ -35,7 +40,8 @@ export const LectureUpdateInputSchema = Joi.object({
 export const LectureSearchInputSchema = Joi.object({
   searchBy: Joi.object({
     id: Joi.string().optional(),
-    name: Joi.string().optional(),
+    title: Joi.string().optional(),
   }).optional(),
   options: LectureOptionsSchema,
+  pagination: LecturePaginationSchema,
 }).meta({ className: "LectureSearchInput" });
