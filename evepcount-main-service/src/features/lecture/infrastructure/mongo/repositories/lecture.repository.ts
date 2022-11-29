@@ -25,13 +25,14 @@ export class LectureRepository implements ILectureRepository {
     const result = await this.collection.insertOne({
       title: input.title,
       description,
+      peopleCountingPhotos: [],
+      photos: [],
     });
+    myLogger.debug("lecture created", { id: result.insertedId.toHexString() });
     return {
       id: result.insertedId.toHexString(),
       title: input.title,
       description,
-      peopleCountingPhotos: [],
-      photos: [],
     };
   }
 
@@ -39,6 +40,10 @@ export class LectureRepository implements ILectureRepository {
     lecture: Lecture,
     input: LectureUpdateRepoData
   ): Promise<Lecture> {
+    myLogger.debug("updating lecture", {
+      id: lecture.id,
+      ...input,
+    });
     const updateDoc: { $set: LectureUpdateRepoData } = { $set: {} };
     if (input.title) {
       updateDoc["$set"]["title"] = input.title;
@@ -50,6 +55,7 @@ export class LectureRepository implements ILectureRepository {
       { _id: new ObjectId(lecture.id) },
       updateDoc
     );
+    myLogger.debug("lecture updated", { id: lecture.id });
     return {
       id: lecture.id,
       title: input.title ?? lecture.title,
@@ -58,10 +64,13 @@ export class LectureRepository implements ILectureRepository {
   }
 
   async delete(lecture: Lecture): Promise<void> {
+    myLogger.debug("deleting lecture", { id: lecture.id });
     await this.collection.deleteOne({ _id: new ObjectId(lecture.id) });
+    myLogger.debug("lecture deleted", { id: lecture.id });
   }
 
   async getOneBy(input: LectureSearchInput): Promise<Lecture | undefined> {
+    myLogger.debug("getting one lecture by", { input });
     const query = this.getQuery(input.searchBy);
     const projection = this.getProjection(input.options);
 
@@ -70,10 +79,12 @@ export class LectureRepository implements ILectureRepository {
     });
 
     if (result === null) {
+      myLogger.debug("lecture not found");
       return undefined;
     }
 
     const { _id, ...rest } = result ?? {};
+    myLogger.debug("lecture found", { id: _id.toHexString() });
     return {
       id: _id.toHexString(),
       ...rest,
@@ -83,6 +94,7 @@ export class LectureRepository implements ILectureRepository {
   async getManyBy(
     input: LectureSearchInput
   ): Promise<SLPaginationResult<Lecture>> {
+    myLogger.debug("getting many lectures by", { input });
     const query = this.getQuery(input.searchBy);
     const projection = this.getProjection(input.options);
 
@@ -109,21 +121,14 @@ export class LectureRepository implements ILectureRepository {
   }
 
   private getQuery(searchBy: LectureSearchInput["searchBy"]) {
-    if (searchBy === undefined) {
-      throw new RepositoryError(
-        "searchBy is required",
-        ErrorCode.INVALID_OPERATION
-      );
-    }
-
     const query: { [key: string]: any } = {};
 
-    if (searchBy.id) {
+    if (searchBy?.id) {
       query["_id"] = new ObjectId(searchBy.id);
     }
 
-    if (searchBy.title) {
-      query["title"] = searchBy.title;
+    if (searchBy?.title) {
+      query["title"] = { $regex: new RegExp("^" + searchBy.title, "i") };
     }
 
     return query;
