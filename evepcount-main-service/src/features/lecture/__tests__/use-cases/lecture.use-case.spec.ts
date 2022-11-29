@@ -5,29 +5,33 @@ import {
 } from "@common/logging/winston-logger";
 import { Lecture } from "@features/lecture/entities/lecture";
 import { LectureRepository } from "@features/lecture/infrastructure/mongo/repositories/lecture.repository";
-import { TEST_LECTURES } from "../mocks/test-data";
+import { LectureUseCase } from "@features/lecture/use-cases/lecture.use-case";
+import {
+  getLectureCollection,
+  LectureDocument,
+} from "@features/lecture/infrastructure/mongo/models/lecture.document";
 import { Collection } from "mongodb";
 import {
   closeMongoConnection,
   getMongoTestDatabase,
 } from "test/test-mongo-client";
-import {
-  getLectureCollection,
-  LectureDocument,
-} from "@features/lecture/infrastructure/mongo/models/lecture.document";
+import { TEST_LECTURES } from "../mocks/test-data";
+import { ILectureUseCase } from "@features/lecture/definitions/lecture.use-case.definition";
 
 const logger = createTestLogger();
 const winstonLogger = new WinstonLogger(logger);
 AppLogger.getAppLogger().setLogger(winstonLogger);
 
-describe("lecture repository", () => {
+describe("lecture use-case", () => {
   let lectureRepository: LectureRepository;
+  let lectureUseCase: ILectureUseCase;
   let lectureCollection: Collection<LectureDocument>;
 
   beforeAll(async () => {
     const mongoData = getMongoTestDatabase();
     lectureCollection = getLectureCollection(mongoData.mongoDatabase);
     lectureRepository = new LectureRepository(lectureCollection);
+    lectureUseCase = new LectureUseCase(lectureRepository);
   });
 
   afterAll(async () => {
@@ -35,12 +39,15 @@ describe("lecture repository", () => {
   });
 
   describe("Create", () => {
-    beforeEach(async () => {});
+    beforeEach(async () => {
+      await lectureCollection.deleteMany({});
+    });
 
     it("should create a lecture", async () => {
-      const inputData = TEST_LECTURES.lecture1;
-      const lecture = await lectureRepository.create(inputData);
-      expect(lecture).toMatchObject(inputData);
+      const lecture = await lectureUseCase.create({
+        data: TEST_LECTURES.lecture1,
+      });
+      expect(lecture).toMatchObject(TEST_LECTURES.lecture1);
 
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture.id },
@@ -60,8 +67,12 @@ describe("lecture repository", () => {
     it("should update a lecture", async () => {
       const inputData = {
         title: "test lecture updated",
+        description: "test lecture description updated",
       };
-      const lecture = await lectureRepository.update(lecture1, inputData);
+      const lecture = await lectureUseCase.update({
+        data: inputData,
+        searchBy: { id: lecture1.id },
+      });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture.id },
       });
@@ -81,7 +92,7 @@ describe("lecture repository", () => {
     });
 
     it("should delete a lecture", async () => {
-      await lectureRepository.delete(lecture1);
+      await lectureUseCase.delete({ id: lecture1.id });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
       });
@@ -95,49 +106,28 @@ describe("lecture repository", () => {
     beforeAll(async () => {
       await lectureCollection.deleteMany({});
       lecture1 = await lectureRepository.create(TEST_LECTURES.lecture1);
-      await lectureRepository.create(TEST_LECTURES.lecture3);
     });
 
     it("should get a lecture by id", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
+      const lectureRetrieved = await lectureUseCase.getOneBy({
         searchBy: { id: lecture1.id },
       });
       expect(lectureRetrieved).toBeDefined();
-      expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture1);
-    });
-    it("should get a lecture by id and fetch photos", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
-        searchBy: { id: lecture1.id },
-        options: { fetchPhotos: true },
-      });
-      expect(lectureRetrieved?.photos).toBeDefined();
-      expect(lectureRetrieved?.photos).toHaveLength(0);
-      expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture1);
-    });
-    it("should get a lecture by id and fetch people counting photos", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
-        searchBy: { id: lecture1.id },
-        options: { fetchPeopleCountingPhotos: true },
-      });
-      expect(lectureRetrieved?.peopleCountingPhotos).toBeDefined();
-      expect(lectureRetrieved?.peopleCountingPhotos).toHaveLength(0);
-      expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture1);
     });
     it("should get a lecture by title", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
-        searchBy: { title: "diff" },
+      const lectureRetrieved = await lectureUseCase.getOneBy({
+        searchBy: { title: lecture1.title },
       });
       expect(lectureRetrieved).toBeDefined();
-      expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture3);
     });
     it("should not get a lecture by id", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
+      const lectureRetrieved = await lectureUseCase.getOneBy({
         searchBy: { id: "11111111111aaaaabce4eaff" },
       });
       expect(lectureRetrieved).toBeUndefined();
     });
     it("should not get a lecture by title", async () => {
-      const lectureRetrieved = await lectureRepository.getOneBy({
+      const lectureRetrieved = await lectureUseCase.getOneBy({
         searchBy: { title: "asdasdnmaueygasd" },
       });
       expect(lectureRetrieved).toBeUndefined();
@@ -153,32 +143,12 @@ describe("lecture repository", () => {
         lectureRepository.create(TEST_LECTURES.lecture3),
       ]);
     });
-
     it("should get all lectures", async () => {
-      const lectures = await lectureRepository.getManyBy({});
-      expect(lectures.results).toHaveLength(3);
-      expect(lectures.count).toBe(3);
+      const lecturesRetrieved = await lectureUseCase.getManyBy({});
+      expect(lecturesRetrieved.count).toBe(3);
     });
-    it("should get all lectures and fetch photos", async () => {
-      const lectures = await lectureRepository.getManyBy({
-        options: { fetchPhotos: true },
-      });
-      expect(lectures.results).toHaveLength(3);
-      expect(lectures.results.map((l) => l.photos?.length)).toEqual([0, 0, 0]);
-      expect(lectures.count).toBe(3);
-    });
-    it("should get all lectures and fetch people counting photos", async () => {
-      const lectures = await lectureRepository.getManyBy({
-        options: { fetchPeopleCountingPhotos: true },
-      });
-      expect(lectures.results).toHaveLength(3);
-      expect(
-        lectures.results.map((l) => l.peopleCountingPhotos?.length)
-      ).toEqual([0, 0, 0]);
-      expect(lectures.count).toBe(3);
-    });
-    it("should get all lectures with title test", async () => {
-      const lectures = await lectureRepository.getManyBy({
+    it("should get all lectures with name ele", async () => {
+      const lectures = await lectureUseCase.getManyBy({
         searchBy: { title: "test" },
       });
       expect(lectures.count).toBe(2);
