@@ -35,7 +35,9 @@ describe("lecture repository", () => {
   });
 
   describe("Create", () => {
-    beforeEach(async () => {});
+    beforeEach(async () => {
+      await lectureCollection.deleteMany({});
+    });
 
     it("should create a lecture", async () => {
       const inputData = TEST_LECTURES.lecture1;

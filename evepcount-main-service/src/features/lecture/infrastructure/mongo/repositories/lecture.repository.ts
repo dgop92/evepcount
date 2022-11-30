@@ -9,7 +9,6 @@ import {
 import { LectureSearchInput } from "@features/lecture/schema-types";
 import { LectureDocument } from "../models/lecture.document";
 import { Collection, ObjectId } from "mongodb";
-import { ErrorCode, RepositoryError } from "@common/errors";
 import { getMongoProjection } from "@common/mongo/utils";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);

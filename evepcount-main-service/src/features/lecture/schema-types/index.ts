@@ -3,4 +3,5 @@
  * Do not modify this file manually
  */
 
+export * from './lecture-photo';
 export * from './lecture';
