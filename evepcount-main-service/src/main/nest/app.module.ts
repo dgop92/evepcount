@@ -1,16 +1,17 @@
-import { BasicModule } from "@features/basic/basic.module";
+import { LectureModule } from "@features/lecture/infrastructure/nest/lecture.module";
 import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { APP_FILTER, RouterModule } from "@nestjs/core";
+import { closeMongoConnection } from "../mongo-client";
 import { AllExceptionsFilter } from "./general-exception-filter";
 import { LoggerMiddleware } from "./logger-middleware";
 
 @Module({
   imports: [
-    BasicModule,
+    LectureModule,
     RouterModule.register([
       {
-        path: "basic",
-        module: BasicModule,
+        path: "lecture",
+        module: LectureModule,
       },
     ]),
   ],
@@ -26,5 +27,9 @@ export class AppModule {
     consumer
       .apply(LoggerMiddleware)
       .forRoutes({ path: "*", method: RequestMethod.ALL });
+  }
+
+  onModuleDestroy() {
+    closeMongoConnection();
   }
 }

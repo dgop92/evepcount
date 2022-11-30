@@ -7,9 +7,11 @@ import { AppModule } from "./nest/app.module";
 import { AllExceptionsFilter } from "./nest/general-exception-filter";
 import { setupFactories } from "./setup-factories";
 import { APP_ENV_VARS } from "@common/config/app-env-vars";
+import { getMongoDatabase } from "./mongo-client";
 
 export async function startApp() {
-  setupFactories();
+  const { mongoDatabase } = getMongoDatabase();
+  setupFactories(mongoDatabase);
 
   const app = await NestFactory.create(AppModule);
   const httpAdapterHost = app.get(HttpAdapterHost);
