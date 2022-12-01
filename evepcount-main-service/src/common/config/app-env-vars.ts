@@ -13,6 +13,9 @@ export const APP_ENV_VARS = {
   logging: {
     level: getOsEnvOrDefault("LOG_LEVEL", "info"),
   },
+  cloudinary: {
+    baseFolder: `${getOsEnv("CLOUDINARY_BASE_FOLDER")}/${getOsEnv("NODE_ENV")}`,
+  },
   db: {
     mongoUrl: getOsEnv("MONGO_URL"),
     databaseName: getOsEnv("MONGO_DB_NAME"),
