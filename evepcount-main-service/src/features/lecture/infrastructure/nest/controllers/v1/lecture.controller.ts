@@ -1,5 +1,7 @@
 import { ErrorCode, PresentationError } from "@common/errors";
+import { ILecturePhotoUseCase } from "@features/lecture/definitions/lecture-photo.use-case.definition";
 import { ILectureUseCase } from "@features/lecture/definitions/lecture.use-case.definition";
+import { myLecturePhotoFactory } from "@features/lecture/factories/lecture-photo.factory";
 import { myLectureFactory } from "@features/lecture/factories/lecture.factory";
 import {
   LectureCreateInput,
@@ -15,7 +17,10 @@ import {
   Param,
   Patch,
   Delete,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 type CreateLectureRequest = LectureCreateInput["data"];
 type UpdateLectureRequest = LectureUpdateInput["data"];
@@ -30,9 +35,12 @@ type QueryParamsWithPagination = QueryParams & LectureSearchInput["pagination"];
 })
 export class LectureControllerV1 {
   private lectureUseCase: ILectureUseCase;
+  private lecturePhotoUseCase: ILecturePhotoUseCase;
   constructor() {
     const { lectureUseCase } = myLectureFactory();
+    const { lecturePhotoUseCase } = myLecturePhotoFactory();
     this.lectureUseCase = lectureUseCase;
+    this.lecturePhotoUseCase = lecturePhotoUseCase;
   }
 
   @Post()
@@ -57,17 +65,17 @@ export class LectureControllerV1 {
     @Param("id") id: string,
     @Query() query: LectureSearchInput["options"]
   ) {
-    const business = await this.lectureUseCase.getOneBy({
+    const lecture = await this.lectureUseCase.getOneBy({
       searchBy: { id },
       options: {
         fetchPeopleCountingPhotos: query?.fetchPeopleCountingPhotos,
         fetchPhotos: query?.fetchPhotos,
       },
     });
-    if (!business) {
-      throw new PresentationError("business not found", ErrorCode.NOT_FOUND);
+    if (!lecture) {
+      throw new PresentationError("lecture not found", ErrorCode.NOT_FOUND);
     }
-    return business;
+    return lecture;
   }
 
   @Patch(":id")
@@ -78,5 +86,34 @@ export class LectureControllerV1 {
   @Delete(":id")
   delete(@Param("id") id: string) {
     return this.lectureUseCase.delete({ id });
+  }
+
+  @Post(":id/photos")
+  @UseInterceptors(FileInterceptor("file"))
+  async addPhoto(
+    @UploadedFile() file: Express.Multer.File,
+    @Param("id") id: string
+  ) {
+    const base64Content = file.buffer.toString("base64");
+    const fileAsBase64 = `data:${file.mimetype};base64,${base64Content}`;
+    const lecturePhoto = await this.lecturePhotoUseCase.create({
+      data: { lectureId: id, image: fileAsBase64 },
+    });
+    return lecturePhoto;
+  }
+
+  @Get(":id/photos")
+  getAllPhotos(@Param("id") id: string) {
+    return this.lecturePhotoUseCase.getManyBy(id);
+  }
+
+  @Delete(":id/photos/:photoId")
+  removePhoto(@Param("id") id: string, @Param("photoId") photoId: string) {
+    return this.lecturePhotoUseCase.delete({
+      searchBy: {
+        imageId: photoId,
+        lectureId: id,
+      },
+    });
   }
 }

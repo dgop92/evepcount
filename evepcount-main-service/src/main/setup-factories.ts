@@ -1,6 +1,6 @@
-import { myLectureFactory } from "@features/lecture/factories/lecture.factory";
+import { lectureModuleFactory } from "@features/lecture/factories";
 import { Db } from "mongodb";
 
 export function setupFactories(database?: Db) {
-  myLectureFactory(database);
+  lectureModuleFactory(database);
 }
