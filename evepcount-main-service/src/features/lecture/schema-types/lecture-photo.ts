@@ -10,9 +10,9 @@ export interface LecturePhotoCreateInput {
   };
 }
 
-export interface LecturePhotoSearchInput {
-  searchBy?: {
-    imageId?: string;
-    lectureId?: string;
+export interface LecturePhotoDeleteInput {
+  searchBy: {
+    imageId: string;
+    lectureId: string;
   };
 }

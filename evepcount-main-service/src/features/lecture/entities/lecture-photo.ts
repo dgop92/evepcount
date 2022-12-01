@@ -12,9 +12,9 @@ export const LecturePhotoCreateInputSchema = Joi.object({
   }).required(),
 }).meta({ className: "LecturePhotoCreateInput" });
 
-export const LecturePhotoSearchInputSchema = Joi.object({
+export const LecturePhotoDeleteInputSchema = Joi.object({
   searchBy: Joi.object({
-    lectureId: Joi.string().optional(),
-    imageId: Joi.string().optional(),
-  }).optional(),
-}).meta({ className: "LecturePhotoSearchInput" });
+    lectureId: Joi.string().required(),
+    imageId: Joi.string().required(),
+  }).required(),
+}).meta({ className: "LecturePhotoDeleteInput" });
