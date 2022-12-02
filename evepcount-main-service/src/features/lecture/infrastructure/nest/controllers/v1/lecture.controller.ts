@@ -7,6 +7,7 @@ import {
   LectureCreateInput,
   LectureSearchInput,
   LectureUpdateInput,
+  PeopleCountingMessageCreateInput,
 } from "@features/lecture/schema-types";
 import {
   Controller,
@@ -24,6 +25,10 @@ import { FileInterceptor } from "@nestjs/platform-express";
 
 type CreateLectureRequest = LectureCreateInput["data"];
 type UpdateLectureRequest = LectureUpdateInput["data"];
+type PeopleCountingMessageRequest = Omit<
+  PeopleCountingMessageCreateInput["data"],
+  "lectureId"
+>;
 
 type QueryParams = LectureSearchInput["searchBy"] &
   LectureSearchInput["options"];
@@ -86,6 +91,16 @@ export class LectureControllerV1 {
   @Delete(":id")
   delete(@Param("id") id: string) {
     return this.lectureUseCase.delete({ id });
+  }
+
+  @Post(":id/send-people-counting-message")
+  sendPeopleCountingMessage(
+    @Param("id") id: string,
+    @Body() data: PeopleCountingMessageRequest
+  ) {
+    return this.lecturePhotoUseCase.sendPhotosToBeProceeded({
+      data: { imageIds: data.imageIds, lectureId: id },
+    });
   }
 
   @Post(":id/photos")

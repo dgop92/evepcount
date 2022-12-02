@@ -35,7 +35,9 @@ describe("lecture-photo use-case", () => {
     const mongoData = getMongoTestDatabase();
     const db = mongoData.mongoDatabase;
 
-    const { lecturePhotoFactory, lectureFactory } = lectureModuleFactory(db);
+    const { lecturePhotoFactory, lectureFactory } = lectureModuleFactory({
+      database: db,
+    });
     lecturePhotoUseCase = lecturePhotoFactory.lecturePhotoUseCase;
     lectureRepository = lectureFactory.lectureRepository;
 
