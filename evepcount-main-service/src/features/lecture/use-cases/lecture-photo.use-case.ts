@@ -13,21 +13,28 @@ import { ILecturePhotoUseCase } from "../definitions/lecture-photo.use-case.defi
 import {
   LecturePhotoCreateInput,
   LecturePhotoDeleteInput,
+  PeopleCountingMessageCreateInput,
 } from "../schema-types";
 import { ILectureUseCase } from "../definitions/lecture.use-case.definition";
+import { IPeopleCountingPublisher } from "../definitions/people-counting-publisher.definition";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
 export class LecturePhotoUseCase implements ILecturePhotoUseCase {
   private lectureUseCase: ILectureUseCase;
+  private peopleCountingPublisher: IPeopleCountingPublisher;
 
   constructor(
     private readonly repository: ILecturePhotoRepository,
     private readonly photoService: ILecturePhotoService
   ) {}
 
-  setDependencies(lectureUseCase: ILectureUseCase): void {
+  setDependencies(
+    lectureUseCase: ILectureUseCase,
+    peopleCountingPublisher: IPeopleCountingPublisher
+  ): void {
     this.lectureUseCase = lectureUseCase;
+    this.peopleCountingPublisher = peopleCountingPublisher;
   }
 
   // Note: if the linking to the lecture fails, the image will be orphaned in the image store service. Consider using a cron job to clean up orphaned images.
@@ -83,6 +90,42 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
 
   getManyBy(lectureId: string): Promise<LecturePhoto[]> {
     return this.repository.getManyBy(lectureId);
+  }
+
+  async sendPhotosToBeProceeded(
+    input: PeopleCountingMessageCreateInput
+  ): Promise<void> {
+    const lectureId = input.data.lectureId;
+    myLogger.debug("getting lecture", {
+      lectureId,
+    });
+    const lecture = await this.lectureUseCase.getOneBy({
+      searchBy: { id: lectureId },
+      options: { fetchPhotos: true },
+    });
+    if (!lecture) {
+      throw new ApplicationError("lecture not found", ErrorCode.NOT_FOUND);
+    }
+
+    const imageIds = input.data.imageIds;
+    const lecturePhotos = lecture.photos!;
+
+    const photosToBeProcessed: LecturePhoto[] = [];
+    imageIds.forEach((imageId) => {
+      const lecturePhoto = lecturePhotos.find((p) => p.id === imageId);
+      if (!lecturePhoto) {
+        throw new ApplicationError(
+          "lecture photo not found",
+          ErrorCode.NOT_FOUND
+        );
+      }
+      photosToBeProcessed.push(lecturePhoto);
+    });
+
+    await this.peopleCountingPublisher.publish({
+      lectureId,
+      photos: photosToBeProcessed,
+    });
   }
 
   private validateInput(schema: Joi.ObjectSchema, input: any): void {

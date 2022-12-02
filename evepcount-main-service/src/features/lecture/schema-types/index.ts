@@ -5,3 +5,4 @@
 
 export * from './lecture-photo';
 export * from './lecture';
+export * from './people-counting-message';

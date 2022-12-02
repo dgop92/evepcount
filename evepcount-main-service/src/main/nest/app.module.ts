@@ -1,6 +1,7 @@
 import { LectureModule } from "@features/lecture/infrastructure/nest/lecture.module";
 import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { APP_FILTER, RouterModule } from "@nestjs/core";
+import { closeAmqpClient } from "main/amqp-factory";
 import { closeMongoConnection } from "../mongo-client";
 import { AllExceptionsFilter } from "./general-exception-filter";
 import { LoggerMiddleware } from "./logger-middleware";
@@ -31,5 +32,6 @@ export class AppModule {
 
   onModuleDestroy() {
     closeMongoConnection();
+    closeAmqpClient();
   }
 }

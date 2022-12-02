@@ -18,6 +18,7 @@ import {
 } from "@features/lecture/infrastructure/mongo/models/lecture.document";
 import { Collection } from "mongodb";
 import { lectureModuleFactory } from "@features/lecture/factories";
+import { ApplicationError, ErrorCode } from "@common/errors";
 
 const logger = createTestLogger();
 const winstonLogger = new WinstonLogger(logger);
@@ -63,6 +64,74 @@ describe("lecture-photo use-case", () => {
       });
       expect(lectureRetrieved?.photos?.length).toBe(1);
       expect(lectureRetrieved?.photos?.[0]).toMatchObject(lecturePhoto);
+    });
+  });
+
+  describe("should send photos to be proceeded", () => {
+    let lecturePhoto1: LecturePhoto;
+    let lecturePhoto2: LecturePhoto;
+
+    beforeEach(async () => {
+      await lectureCollection.deleteMany({});
+      lecture1 = await lectureRepository.create({
+        ...TEST_LECTURES.lecture1,
+      });
+      const photos = await Promise.all([
+        lecturePhotoUseCase.create({
+          data: {
+            image: "dummy_image",
+            lectureId: lecture1.id,
+          },
+        }),
+        lecturePhotoUseCase.create({
+          data: {
+            image: "dummy_image",
+            lectureId: lecture1.id,
+          },
+        }),
+      ]);
+      lecturePhoto1 = photos[0];
+      lecturePhoto2 = photos[1];
+    });
+
+    it("should send photos successfully", async () => {
+      await lecturePhotoUseCase.sendPhotosToBeProceeded({
+        data: {
+          lectureId: lecture1.id,
+          imageIds: [lecturePhoto1.id, lecturePhoto2.id],
+        },
+      });
+      expect(true).toBe(true);
+    });
+    it("should throw an error if lecture photo is not found", async () => {
+      try {
+        await lecturePhotoUseCase.sendPhotosToBeProceeded({
+          data: {
+            lectureId: lecture1.id,
+            imageIds: [lecturePhoto1.id, "asdasdr"],
+          },
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApplicationError);
+        if (error instanceof ApplicationError) {
+          expect(error.errorCode).toBe(ErrorCode.NOT_FOUND);
+        }
+      }
+    });
+    it("should throw an error if lecture is not found", async () => {
+      try {
+        await lecturePhotoUseCase.sendPhotosToBeProceeded({
+          data: {
+            lectureId: "11111111111aaaaabce4eaff",
+            imageIds: [lecturePhoto1.id],
+          },
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApplicationError);
+        if (error instanceof ApplicationError) {
+          expect(error.errorCode).toBe(ErrorCode.NOT_FOUND);
+        }
+      }
     });
   });
 

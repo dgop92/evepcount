@@ -20,6 +20,9 @@ export const APP_ENV_VARS = {
     mongoUrl: getOsEnv("MONGO_URL"),
     databaseName: getOsEnv("MONGO_DB_NAME"),
   },
+  rabbitmq: {
+    url: getOsEnv("RABBITMQ_URL"),
+  },
   cors: {
     allowOrigins: parseListOrDefault(
       getOsEnvOrDefault("CORS_ALLOW_ORIGINS", ""),
