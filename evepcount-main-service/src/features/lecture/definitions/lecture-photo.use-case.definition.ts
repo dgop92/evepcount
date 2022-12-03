@@ -3,7 +3,9 @@ import {
   LecturePhotoCreateInput,
   LecturePhotoDeleteInput,
   PeopleCountingMessageCreateInput,
+  PeopleCountingResultInput,
 } from "@features/lecture/schema-types";
+import { PhotoPeopleCounting } from "../entities/photo-people-counting";
 
 export interface ILecturePhotoUseCase {
   create(input: LecturePhotoCreateInput): Promise<LecturePhoto>;
@@ -12,4 +14,7 @@ export interface ILecturePhotoUseCase {
   sendPhotosToBeProceeded(
     input: PeopleCountingMessageCreateInput
   ): Promise<void>;
+  addPeopleCounting(
+    input: PeopleCountingResultInput
+  ): Promise<PhotoPeopleCounting[]>;
 }

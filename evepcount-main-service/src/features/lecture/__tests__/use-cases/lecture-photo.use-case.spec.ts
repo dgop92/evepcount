@@ -69,6 +69,56 @@ describe("lecture-photo use-case", () => {
     });
   });
 
+  describe("create people counting successfully", () => {
+    let lecturePhoto1: LecturePhoto;
+    let lecturePhoto2: LecturePhoto;
+
+    beforeEach(async () => {
+      await lectureCollection.deleteMany({});
+      lecture1 = await lectureRepository.create({
+        ...TEST_LECTURES.lecture1,
+      });
+      const photos = await Promise.all([
+        lecturePhotoUseCase.create({
+          data: {
+            image: "dummy_image",
+            lectureId: lecture1.id,
+          },
+        }),
+        lecturePhotoUseCase.create({
+          data: {
+            image: "dummy_image",
+            lectureId: lecture1.id,
+          },
+        }),
+      ]);
+      lecturePhoto1 = photos[0];
+      lecturePhoto2 = photos[1];
+    });
+
+    it("should create people counting", async () => {
+      await lecturePhotoUseCase.addPeopleCounting({
+        data: {
+          lectureId: lecture1.id,
+          peopleCountingPhotos: [
+            { imageId: lecturePhoto1.id, numberOfPeople: 10 },
+          ],
+        },
+      });
+      const lectureRetrieved = await lectureRepository.getOneBy({
+        searchBy: { id: lecture1.id },
+        options: { fetchPeopleCountingPhotos: true },
+      });
+      expect(lectureRetrieved?.peopleCountingPhotos?.length).toBe(1);
+      expect(lectureRetrieved?.peopleCountingPhotos?.[0].imageId).toBe(
+        lecturePhoto1.id
+      );
+      expect(lectureRetrieved?.peopleCountingPhotos?.[0].numberOfPeople).toBe(
+        10
+      );
+    });
+  });
+
   describe("should send photos to be proceeded", () => {
     let lecturePhoto1: LecturePhoto;
     let lecturePhoto2: LecturePhoto;

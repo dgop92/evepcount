@@ -14,9 +14,15 @@ import {
   LecturePhotoCreateInput,
   LecturePhotoDeleteInput,
   PeopleCountingMessageCreateInput,
+  PeopleCountingResultInput,
 } from "../schema-types";
 import { ILectureUseCase } from "../definitions/lecture.use-case.definition";
 import { IPeopleCountingPublisher } from "../definitions/people-counting-publisher.definition";
+import {
+  PeopleCountingResultInputSchema,
+  PhotoPeopleCounting,
+} from "../entities/photo-people-counting";
+import { PeopleCountingMessageCreateInputSchema } from "../entities/people-counting-message";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
@@ -95,6 +101,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
   async sendPhotosToBeProceeded(
     input: PeopleCountingMessageCreateInput
   ): Promise<void> {
+    this.validateInput(PeopleCountingMessageCreateInputSchema, input);
     const lectureId = input.data.lectureId;
     myLogger.debug("getting lecture", {
       lectureId,
@@ -126,6 +133,29 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
       lectureId,
       photos: photosToBeProcessed,
     });
+  }
+
+  async addPeopleCounting(
+    input: PeopleCountingResultInput
+  ): Promise<PhotoPeopleCounting[]> {
+    this.validateInput(PeopleCountingResultInputSchema, input);
+
+    const lectureId = input.data.lectureId;
+    myLogger.debug("getting lecture", {
+      lectureId,
+    });
+    const lecture = await this.lectureUseCase.getOneBy({
+      searchBy: { id: lectureId },
+      options: { fetchPhotos: true },
+    });
+    if (!lecture) {
+      throw new ApplicationError("lecture not found", ErrorCode.NOT_FOUND);
+    }
+    const peopleCounting = await this.repository.addPeopleCounting(
+      lecture,
+      input.data.peopleCountingPhotos
+    );
+    return peopleCounting;
   }
 
   private validateInput(schema: Joi.ObjectSchema, input: any): void {

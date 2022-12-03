@@ -7,6 +7,7 @@ import {
   LecturePhotoCreateRepoData,
 } from "@features/lecture/definitions/lecture-photo.repository.definition";
 import { LecturePhoto } from "@features/lecture/entities/lecture-photo";
+import { PhotoPeopleCounting } from "@features/lecture/entities/photo-people-counting";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
@@ -36,10 +37,33 @@ export class LecturePhotoRepository implements ILecturePhotoRepository {
       { _id: new ObjectId(lecture.id) },
       { $pull: { photos: { id: lecturePhoto.id } } }
     );
+    await this.collection.updateOne(
+      { _id: new ObjectId(lecture.id) },
+      { $pull: { peopleCountingPhotos: { imageId: lecturePhoto.id } } }
+    );
     myLogger.debug("photo deleted from lecture", {
       id: lecture.id,
       lecturePhoto,
     });
+  }
+
+  async addPeopleCounting(
+    lecture: Lecture,
+    photoPeopleCounting: PhotoPeopleCounting[]
+  ): Promise<PhotoPeopleCounting[]> {
+    myLogger.debug("adding people counting to photo", {
+      id: lecture.id,
+      photoPeopleCounting,
+    });
+    await this.collection.updateOne(
+      { _id: new ObjectId(lecture.id) },
+      { $addToSet: { peopleCountingPhotos: { $each: photoPeopleCounting } } }
+    );
+    myLogger.debug("people counting added to photo", {
+      id: lecture.id,
+      photoPeopleCounting,
+    });
+    return photoPeopleCounting;
   }
 
   async getManyBy(lectureId: string): Promise<LecturePhoto[]> {
