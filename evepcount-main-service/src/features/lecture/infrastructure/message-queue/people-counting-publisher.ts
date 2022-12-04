@@ -1,20 +1,22 @@
 import { AppLogger } from "@common/logging/logger";
-import { AmqpClient } from "@common/message-queue/amqp-client";
-import {
-  IPeopleCountingPublisher,
-  PEOPLE_COUNTING_EXCHANGE,
-} from "../../definitions/people-counting-publisher.definition";
+import { MessageQueueClient } from "@common/message-queue/message-queue.client";
+import { IPeopleCountingPublisher } from "../../definitions/people-counting-publisher.definition";
 import { PeopleCountingMessage } from "../../entities/people-counting-message";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
 export class PeopleCountingPublisher implements IPeopleCountingPublisher {
-  constructor(private readonly amqpClient: AmqpClient) {}
+  constructor(private readonly messageQueueClient: MessageQueueClient) {}
 
   async publish(input: PeopleCountingMessage): Promise<void> {
-    myLogger.debug("publishing people counting message", {
+    myLogger.debug("publishing people counting message to request queue", {
       input,
     });
-    this.amqpClient.send(PEOPLE_COUNTING_EXCHANGE, input, "pcount-request");
+    // Publish message directly to the queue
+    this.messageQueueClient.publish<PeopleCountingMessage>(
+      "default",
+      { data: input },
+      "pcount-request-queue"
+    );
   }
 }

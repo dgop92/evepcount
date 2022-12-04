@@ -37,6 +37,7 @@ describe("lecture-photo use-case", () => {
 
     const { lecturePhotoFactory, lectureFactory } = lectureModuleFactory({
       database: db,
+      messageQueueClient: null!,
     });
     lecturePhotoUseCase = lecturePhotoFactory.lecturePhotoUseCase;
     lectureRepository = lectureFactory.lectureRepository;

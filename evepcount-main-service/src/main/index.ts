@@ -8,13 +8,13 @@ import { AllExceptionsFilter } from "./nest/general-exception-filter";
 import { setupFactories } from "./setup-factories";
 import { APP_ENV_VARS } from "@common/config/app-env-vars";
 import { getMongoDatabase } from "./mongo-client";
-import { amqpClientFactory } from "./amqp-factory";
+import { messageQueueClientFactory } from "./amqp-factory";
 
 export async function startApp() {
   const { mongoDatabase } = getMongoDatabase();
-  const amqpClient = await amqpClientFactory();
+  const { messageQueueClient } = await messageQueueClientFactory();
 
-  setupFactories(mongoDatabase, amqpClient);
+  setupFactories(mongoDatabase, messageQueueClient);
 
   const app = await NestFactory.create(AppModule);
   const httpAdapterHost = app.get(HttpAdapterHost);
