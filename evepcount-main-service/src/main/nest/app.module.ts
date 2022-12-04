@@ -5,6 +5,9 @@ import { closeAmqpClient } from "main/amqp-factory";
 import { closeMongoConnection } from "../mongo-client";
 import { AllExceptionsFilter } from "./general-exception-filter";
 import { LoggerMiddleware } from "./logger-middleware";
+import { AppLogger } from "@common/logging/logger";
+
+const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
 @Module({
   imports: [
@@ -31,7 +34,9 @@ export class AppModule {
   }
 
   onModuleDestroy() {
+    myLogger.info("closing mongo connection");
     closeMongoConnection();
+    myLogger.info("closing amqp connection");
     closeAmqpClient();
   }
 }

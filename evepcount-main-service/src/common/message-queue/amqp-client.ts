@@ -84,7 +84,7 @@ export class AmqpClient {
       this.channel
         .assertQueue(name, options)
         .then((result) => {
-          logger.debug(`$Queue created %o`, result);
+          logger.debug("queue created", result);
 
           return result;
         })
@@ -129,7 +129,7 @@ export class AmqpClient {
     options: Options.Consume,
     callback: AmqpCallbackType
   ): Promise<void> {
-    logger.debug(`Consume queue ${queue} with options`, options);
+    logger.debug(`consume queue ${queue} with options`, options);
     return new Promise((r, e) =>
       this.channel
         .consume(queue, onMessage, options)
