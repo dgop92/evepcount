@@ -8,7 +8,7 @@ from domain.entities.people_counting_result import PeopleCountingResult
 class IFaceDetectionService(Protocol):
     def get_face_locations(
         self,
-        imageAsArray: npt.ArrayLike,
+        imageAsArray: npt.NDArray,
     ) -> List[Tuple[int, int, int, int]]:
         """
         Returns a list of tuples of detected faces in the image.
@@ -19,7 +19,7 @@ class IFaceDetectionService(Protocol):
 
 
 class IImageTransformerService(Protocol):
-    def get_image_as_array_from_url(self, url: str) -> npt.ArrayLike:
+    def get_image_as_array_from_url(self, url: str) -> npt.NDArray:
         """
         Returns a numpy array of the image
         """
