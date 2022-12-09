@@ -31,4 +31,4 @@ def test_successful_people_counting_in_photo(
     )
     result = my_people_counting_usecase.getResult(people_counting_message)
     assert result.lecture_id == "lecture_id"
-    assert len(result.peopleCountingItems) == 2
+    assert len(result.people_counting_items) == 2

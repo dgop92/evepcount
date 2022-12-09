@@ -22,10 +22,10 @@ class PeopleCountingUseCase:
             imageAsArray = self.imageTransformer.get_image_as_array_from_url(photo.url)
             images[photo.id] = imageAsArray
 
-        peopleCountingItems = []
+        people_counting_items = []
         for photo in input.photos:
             faceLocations = self.faceDetector.get_face_locations(images[photo.id])
-            peopleCountingItems.append(
+            people_counting_items.append(
                 PeopleCountingItem(
                     image_id=photo.id,
                     number_of_people=len(faceLocations),
@@ -34,5 +34,5 @@ class PeopleCountingUseCase:
 
         return PeopleCountingResult(
             lecture_id=input.lecture_id,
-            peopleCountingItems=peopleCountingItems,
+            people_counting_items=people_counting_items,
         )

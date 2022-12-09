@@ -6,7 +6,7 @@ import requests
 from PIL import Image
 
 
-class ImageTransformerMock:
+class ImageTransformer:
     def get_image_as_array_from_url(self, url: str) -> npt.ArrayLike:
         """
         Returns a numpy array of the image
