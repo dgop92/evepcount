@@ -38,10 +38,10 @@ def callback(
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except json.JSONDecodeError:
         logger.warning("cannot parse body: %s", body)
-        ch.basic_nack(delivery_tag=method.delivery_tag)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception:
         logger.exception("error while processing message: %s", body)
-        ch.basic_nack(delivery_tag=method.delivery_tag)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def start_rabbitmq():
