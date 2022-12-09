@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy.typing as npt
 
 
-class FaceDetectionMock:
+class HOGFaceDetection:
     def get_face_locations(
         self,
         imageAsArray: npt.NDArray,
@@ -13,6 +13,6 @@ class FaceDetectionMock:
 
         Each tuple contains the coordinates of the top, right, bottom, and left
         """
-        # This class is a mock of the face detection service, we return a fake result
+        # TODO: Implement this method, so far is just a placeholder
         count = imageAsArray.shape[0]
         return [(0, 0, count, count) for _ in range(count)]
