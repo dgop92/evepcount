@@ -6,7 +6,7 @@
 export interface PeopleCountingResultInput {
   data: {
     lectureId: string;
-    peopleCountingPhotos: {
+    peopleCountingItems: {
       imageId: string;
       numberOfPeople: number;
     }[];

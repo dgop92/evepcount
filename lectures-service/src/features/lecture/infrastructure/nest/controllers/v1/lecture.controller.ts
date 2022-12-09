@@ -59,7 +59,7 @@ export class LectureControllerV1 {
       searchBy: { id: query?.id, title: query?.title },
       pagination: { limit: query?.limit, skip: query?.skip },
       options: {
-        fetchPeopleCountingPhotos: query?.fetchPeopleCountingPhotos,
+        fetchPeopleCountingItems: query?.fetchPeopleCountingItems,
         fetchPhotos: query?.fetchPhotos,
       },
     });
@@ -73,7 +73,7 @@ export class LectureControllerV1 {
     const lecture = await this.lectureUseCase.getOneBy({
       searchBy: { id },
       options: {
-        fetchPeopleCountingPhotos: query?.fetchPeopleCountingPhotos,
+        fetchPeopleCountingItems: query?.fetchPeopleCountingItems,
         fetchPhotos: query?.fetchPhotos,
       },
     });

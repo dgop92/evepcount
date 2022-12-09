@@ -6,4 +6,4 @@
 export * from './lecture-photo';
 export * from './lecture';
 export * from './people-counting-message';
-export * from './photo-people-counting';
+export * from './people-counting-result';

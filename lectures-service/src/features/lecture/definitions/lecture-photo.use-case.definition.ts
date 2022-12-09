@@ -5,7 +5,7 @@ import {
   PeopleCountingMessageCreateInput,
   PeopleCountingResultInput,
 } from "@features/lecture/schema-types";
-import { PhotoPeopleCounting } from "../entities/photo-people-counting";
+import { PeopleCountingItem } from "../entities/people-counting-result";
 
 export interface ILecturePhotoUseCase {
   create(input: LecturePhotoCreateInput): Promise<LecturePhoto>;
@@ -16,5 +16,5 @@ export interface ILecturePhotoUseCase {
   ): Promise<void>;
   addPeopleCounting(
     input: PeopleCountingResultInput
-  ): Promise<PhotoPeopleCounting[]>;
+  ): Promise<PeopleCountingItem[]>;
 }

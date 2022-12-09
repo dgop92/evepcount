@@ -20,8 +20,8 @@ import { ILectureUseCase } from "../definitions/lecture.use-case.definition";
 import { IPeopleCountingPublisher } from "../definitions/people-counting-publisher.definition";
 import {
   PeopleCountingResultInputSchema,
-  PhotoPeopleCounting,
-} from "../entities/photo-people-counting";
+  PeopleCountingItem,
+} from "../entities/people-counting-result";
 import { PeopleCountingMessageCreateInputSchema } from "../entities/people-counting-message";
 
 const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
@@ -137,7 +137,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
 
   async addPeopleCounting(
     input: PeopleCountingResultInput
-  ): Promise<PhotoPeopleCounting[]> {
+  ): Promise<PeopleCountingItem[]> {
     this.validateInput(PeopleCountingResultInputSchema, input);
 
     const lectureId = input.data.lectureId;
@@ -153,7 +153,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
     }
     const peopleCounting = await this.repository.addPeopleCounting(
       lecture,
-      input.data.peopleCountingPhotos
+      input.data.peopleCountingItems
     );
     return peopleCounting;
   }

@@ -26,10 +26,12 @@ export function lectureModuleFactory(options: LectureModuleFactoryOptions) {
     peopleCountingFactory.peopleCountingPublisher
   );
 
-  options.messageQueueClient.subscribe(
-    { name: "pcount-replay-queue", options: { durable: true } },
-    listenForPeopleCountingResults(lecturePhotoUseCase)
-  );
+  if (options.messageQueueClient) {
+    options.messageQueueClient.subscribe(
+      { name: "pcount-replay-queue", options: { durable: true } },
+      listenForPeopleCountingResults(lecturePhotoUseCase)
+    );
+  }
 
   return {
     lectureFactory,

@@ -1,7 +1,7 @@
 import { LecturePhoto } from "@features/lecture/entities/lecture-photo";
 import { LecturePhotoCreateInput } from "@features/lecture/schema-types";
 import { Lecture } from "../entities/lecture";
-import { PhotoPeopleCounting } from "../entities/photo-people-counting";
+import { PeopleCountingItem } from "../entities/people-counting-result";
 
 export type LecturePhotoCreateRepoData = Pick<
   LecturePhotoCreateInput["data"],
@@ -17,6 +17,6 @@ export interface ILecturePhotoRepository {
   getManyBy(lectureId: string): Promise<LecturePhoto[]>;
   addPeopleCounting(
     lecture: Lecture,
-    photoPeopleCounting: PhotoPeopleCounting[]
-  ): Promise<PhotoPeopleCounting[]>;
+    peopleCountingItems: PeopleCountingItem[]
+  ): Promise<PeopleCountingItem[]>;
 }

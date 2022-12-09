@@ -11,7 +11,7 @@ export interface LectureCreateInput {
 }
 
 export interface LectureOptions {
-  fetchPeopleCountingPhotos?: boolean;
+  fetchPeopleCountingItems?: boolean;
   fetchPhotos?: boolean;
 }
 

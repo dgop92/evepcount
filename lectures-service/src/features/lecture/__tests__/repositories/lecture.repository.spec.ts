@@ -116,13 +116,13 @@ describe("lecture repository", () => {
       expect(lectureRetrieved?.photos).toHaveLength(0);
       expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture1);
     });
-    it("should get a lecture by id and fetch people counting photos", async () => {
+    it("should get a lecture by id and fetch people counting items", async () => {
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
-        options: { fetchPeopleCountingPhotos: true },
+        options: { fetchPeopleCountingItems: true },
       });
-      expect(lectureRetrieved?.peopleCountingPhotos).toBeDefined();
-      expect(lectureRetrieved?.peopleCountingPhotos).toHaveLength(0);
+      expect(lectureRetrieved?.peopleCountingItems).toBeDefined();
+      expect(lectureRetrieved?.peopleCountingItems).toHaveLength(0);
       expect(lectureRetrieved).toMatchObject(TEST_LECTURES.lecture1);
     });
     it("should get a lecture by title", async () => {
@@ -169,13 +169,13 @@ describe("lecture repository", () => {
       expect(lectures.results.map((l) => l.photos?.length)).toEqual([0, 0, 0]);
       expect(lectures.count).toBe(3);
     });
-    it("should get all lectures and fetch people counting photos", async () => {
+    it("should get all lectures and fetch people counting items", async () => {
       const lectures = await lectureRepository.getManyBy({
-        options: { fetchPeopleCountingPhotos: true },
+        options: { fetchPeopleCountingItems: true },
       });
       expect(lectures.results).toHaveLength(3);
       expect(
-        lectures.results.map((l) => l.peopleCountingPhotos?.length)
+        lectures.results.map((l) => l.peopleCountingItems?.length)
       ).toEqual([0, 0, 0]);
       expect(lectures.count).toBe(3);
     });

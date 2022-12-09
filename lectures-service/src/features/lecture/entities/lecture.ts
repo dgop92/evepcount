@@ -1,5 +1,5 @@
 import { LecturePhoto } from "./lecture-photo";
-import { PhotoPeopleCounting } from "./photo-people-counting";
+import { PeopleCountingItem } from "./people-counting-result";
 import Joi from "joi";
 import { SkipLimitPaginationSchema } from "@common/schemas/pagination";
 
@@ -8,7 +8,7 @@ export interface Lecture {
   title: string;
   description: string;
   photos?: LecturePhoto[];
-  peopleCountingPhotos?: PhotoPeopleCounting[];
+  peopleCountingItems?: PeopleCountingItem[];
 }
 
 export const LecturePaginationSchema = SkipLimitPaginationSchema.meta({
@@ -17,7 +17,7 @@ export const LecturePaginationSchema = SkipLimitPaginationSchema.meta({
 
 export const LectureOptionsSchema = Joi.object({
   fetchPhotos: Joi.boolean().default(false),
-  fetchPeopleCountingPhotos: Joi.boolean().default(false),
+  fetchPeopleCountingItems: Joi.boolean().default(false),
 }).meta({ className: "LectureOptions" });
 
 export const LectureCreateInputSchema = Joi.object({

@@ -97,24 +97,24 @@ describe("lecture-photo use-case", () => {
       lecturePhoto2 = photos[1];
     });
 
-    it("should create people counting", async () => {
+    it("should create people counting results", async () => {
       await lecturePhotoUseCase.addPeopleCounting({
         data: {
           lectureId: lecture1.id,
-          peopleCountingPhotos: [
+          peopleCountingItems: [
             { imageId: lecturePhoto1.id, numberOfPeople: 10 },
           ],
         },
       });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
-        options: { fetchPeopleCountingPhotos: true },
+        options: { fetchPeopleCountingItems: true },
       });
-      expect(lectureRetrieved?.peopleCountingPhotos?.length).toBe(1);
-      expect(lectureRetrieved?.peopleCountingPhotos?.[0].imageId).toBe(
+      expect(lectureRetrieved?.peopleCountingItems?.length).toBe(1);
+      expect(lectureRetrieved?.peopleCountingItems?.[0].imageId).toBe(
         lecturePhoto1.id
       );
-      expect(lectureRetrieved?.peopleCountingPhotos?.[0].numberOfPeople).toBe(
+      expect(lectureRetrieved?.peopleCountingItems?.[0].numberOfPeople).toBe(
         10
       );
     });

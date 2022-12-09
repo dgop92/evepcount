@@ -24,7 +24,7 @@ export class LectureRepository implements ILectureRepository {
     const result = await this.collection.insertOne({
       title: input.title,
       description,
-      peopleCountingPhotos: [],
+      peopleCountingItems: [],
       photos: [],
     });
     myLogger.debug("lecture created", { id: result.insertedId.toHexString() });
@@ -136,7 +136,7 @@ export class LectureRepository implements ILectureRepository {
   private getProjection(options: LectureSearchInput["options"]) {
     const projection = getMongoProjection({
       photos: options?.fetchPhotos,
-      peopleCountingPhotos: options?.fetchPeopleCountingPhotos,
+      peopleCountingItems: options?.fetchPeopleCountingItems,
     });
     return projection;
   }
