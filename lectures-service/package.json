@@ -7,7 +7,8 @@
     "start": "node -r ./scripts/prod-setup.js dist/main/index.js",
     "build": "tsc -p tsconfig.build.json",
     "schema-types": "ts-node -r tsconfig-paths/register ./scripts/create-schema-types.ts",
-    "dev": "ts-node-dev -r ./scripts/dev-setup.ts --respawn src/main/index.ts",
+    "dev-server": "ts-node-dev -r ./scripts/dev-setup.ts --respawn src/main/index.ts",
+    "dev": "ts-node -r ./scripts/dev-setup.ts src/main/index.ts",
     "test": "jest -c ./jest.unit.json --verbose --runInBand",
     "nest": "nest"
   },

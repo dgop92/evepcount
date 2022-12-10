@@ -7,11 +7,19 @@ import { AppModule } from "./nest/app.module";
 import { AllExceptionsFilter } from "./nest/general-exception-filter";
 import { setupFactories } from "./setup-factories";
 import { APP_ENV_VARS } from "@common/config/app-env-vars";
-import { getMongoDatabase } from "./mongo-client";
-import { messageQueueClientFactory } from "./amqp-factory";
+import { closeMongoConnection, getMongoDatabase } from "./mongo-client";
+import { closeAmqpClient, messageQueueClientFactory } from "./amqp-factory";
 
-export async function startApp() {
-  const { mongoDatabase } = getMongoDatabase();
+const logger = createDevLogger();
+const winstonLogger = new WinstonLogger(logger);
+
+AppLogger.getAppLogger().setLogger(winstonLogger);
+const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
+
+myLogger.info("app logger created");
+
+async function startApp() {
+  const { mongoDatabase } = await getMongoDatabase();
   const { messageQueueClient } = await messageQueueClientFactory();
 
   setupFactories(mongoDatabase, messageQueueClient);
@@ -28,16 +36,50 @@ export async function startApp() {
     origin: APP_ENV_VARS.cors.allowOrigins,
   });
   await app.listen(APP_ENV_VARS.port);
-
-  myLogger.info("app started");
 }
 
-const logger = createDevLogger();
-const winstonLogger = new WinstonLogger(logger);
+function closeServices() {
+  try {
+    myLogger.info("closing mongo connection");
+    closeMongoConnection();
+    myLogger.info("closing amqp connection");
+    closeAmqpClient();
+  } catch (error) {
+    myLogger.error("error closing services", { error });
+  }
+}
 
-AppLogger.getAppLogger().setLogger(winstonLogger);
-const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
+process.on("unhandledRejection", (reason, promise) => {
+  myLogger.error("unhandled rejection, node process will finish", {
+    reason,
+    promise,
+  });
+  process.exitCode = 1;
+});
 
-myLogger.info("app logger created");
+process.on("uncaughtException", (err) => {
+  myLogger.error("uncaught exception, node process will finish", { err });
+  process.exitCode = 1;
+});
 
-startApp();
+process.on("SIGINT", function () {
+  process.exit(2);
+});
+
+process.on("exit", function () {
+  // NOTE: this will be called when the node process finishes,
+  // either because of an error or because of a normal exit
+  myLogger.info("node process will exit, cleaning up services");
+  closeServices();
+});
+
+startApp()
+  .then(() => {
+    myLogger.info("app started successfully");
+  })
+  .catch((err) => {
+    // NOTE: errors thrown by startApp() will be caught here,
+    // we can call them boot errors
+    myLogger.error("app failed to start, node process will finish", { err });
+    process.exitCode = 1;
+  });

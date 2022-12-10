@@ -22,6 +22,7 @@ export const APP_ENV_VARS = {
   },
   rabbitmq: {
     url: getOsEnv("RABBITMQ_URL"),
+    timeout: parseIntOrThrow(getOsEnvOrDefault("RABBITMQ_TIMEOUT", "5000")),
   },
   cors: {
     allowOrigins: parseListOrDefault(
