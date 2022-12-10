@@ -17,6 +17,7 @@ import {
 } from "test/test-mongo-client";
 import { TEST_LECTURES } from "../mocks/test-data";
 import { ILectureUseCase } from "@features/lecture/definitions/lecture.use-case.definition";
+import { ApplicationError, ErrorCode } from "@common/errors";
 
 const logger = createTestLogger();
 const winstonLogger = new WinstonLogger(logger);
@@ -81,6 +82,22 @@ describe("lecture use-case", () => {
         id: lecture.id,
       });
     });
+    it("should throw an error if lecture isn't found", async () => {
+      try {
+        await lectureUseCase.update({
+          data: {
+            title: "test lecture updated",
+            description: "test lecture description updated",
+          },
+          searchBy: { id: "11111111111aaaaabce4eaff" },
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApplicationError);
+        if (error instanceof ApplicationError) {
+          expect(error.errorCode).toBe(ErrorCode.NOT_FOUND);
+        }
+      }
+    });
   });
 
   describe("Delete", () => {
@@ -97,6 +114,18 @@ describe("lecture use-case", () => {
         searchBy: { id: lecture1.id },
       });
       expect(lectureRetrieved).toBeUndefined();
+    });
+    it("should throw an error if lecture isn't found", async () => {
+      try {
+        await lectureUseCase.delete({
+          id: "11111111111aaaaabce4eaff",
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApplicationError);
+        if (error instanceof ApplicationError) {
+          expect(error.errorCode).toBe(ErrorCode.NOT_FOUND);
+        }
+      }
     });
   });
 

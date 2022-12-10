@@ -14,7 +14,7 @@ export interface ILecturePhotoUseCase {
   sendPhotosToBeProceeded(
     input: PeopleCountingMessageCreateInput
   ): Promise<void>;
-  addPeopleCounting(
+  addPeopleCountingResults(
     input: PeopleCountingResultInput
   ): Promise<PeopleCountingItem[]>;
 }

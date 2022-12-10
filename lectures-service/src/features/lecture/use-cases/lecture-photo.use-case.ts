@@ -46,6 +46,15 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
   // Note: if the linking to the lecture fails, the image will be orphaned in the image store service. Consider using a cron job to clean up orphaned images.
   async create(input: LecturePhotoCreateInput): Promise<LecturePhoto> {
     this.validateInput(LecturePhotoCreateInputSchema, input);
+
+    const existing = await this.lectureUseCase.getOneBy({
+      searchBy: { id: input.data.lectureId },
+    });
+
+    if (!existing) {
+      throw new ApplicationError("lecture not found", ErrorCode.NOT_FOUND);
+    }
+
     myLogger.debug("saving image to image store service");
     const photo = await this.photoService.saveAsBase64(input.data.image);
     myLogger.debug("linking image to lecture in db");
@@ -135,7 +144,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
     });
   }
 
-  async addPeopleCounting(
+  async addPeopleCountingResults(
     input: PeopleCountingResultInput
   ): Promise<PeopleCountingItem[]> {
     this.validateInput(PeopleCountingResultInputSchema, input);
@@ -146,16 +155,68 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
     });
     const lecture = await this.lectureUseCase.getOneBy({
       searchBy: { id: lectureId },
-      options: { fetchPhotos: true },
+      options: { fetchPhotos: true, fetchPeopleCountingItems: true },
     });
     if (!lecture) {
       throw new ApplicationError("lecture not found", ErrorCode.NOT_FOUND);
     }
-    const peopleCounting = await this.repository.addPeopleCounting(
-      lecture,
-      input.data.peopleCountingItems
+    const lecturePhotoImageIds = lecture.photos!.map((p) => p.id);
+    const inputPeopleCountingItemsImageIds = input.data.peopleCountingItems.map(
+      (p) => p.imageId
     );
-    return peopleCounting;
+    const imageIdsNotBelongingToLecture =
+      inputPeopleCountingItemsImageIds.filter(
+        (imageId) => !lecturePhotoImageIds.includes(imageId)
+      );
+
+    if (imageIdsNotBelongingToLecture.length > 0) {
+      throw new ApplicationError(
+        `the following image ids do not belong to the lecture: ${imageIdsNotBelongingToLecture.join(
+          ", "
+        )}`,
+        ErrorCode.INVALID_OPERATION
+      );
+    }
+
+    const lecturePeopleCountingItemImageIds = lecture.peopleCountingItems!.map(
+      (p) => p.imageId
+    );
+    const peopleCountingItemsToBeAdded = input.data.peopleCountingItems.filter(
+      (p) => !lecturePeopleCountingItemImageIds.includes(p.imageId)
+    );
+
+    const peopleCountingItemsToBeUpdated: {
+      oldPeopleCountingItem: PeopleCountingItem;
+      newPeopleCountingItem: PeopleCountingItem;
+    }[] = [];
+
+    input.data.peopleCountingItems.forEach((newPeopleCountingItem) => {
+      const oldPeopleCountingItem = lecture.peopleCountingItems!.find(
+        (p) => p.imageId === newPeopleCountingItem.imageId
+      );
+      if (oldPeopleCountingItem) {
+        peopleCountingItemsToBeUpdated.push({
+          oldPeopleCountingItem,
+          newPeopleCountingItem,
+        });
+      }
+    });
+
+    const peopleCountingItemsAdded =
+      await this.repository.addPeopleCountingResult(
+        lecture,
+        peopleCountingItemsToBeAdded
+      );
+    const peopleCountingItemsUpdated = await Promise.all(
+      peopleCountingItemsToBeUpdated.map((pcu) =>
+        this.repository.updatePeopleCountingItem(
+          lecture,
+          pcu.oldPeopleCountingItem,
+          pcu.newPeopleCountingItem
+        )
+      )
+    );
+    return [...peopleCountingItemsAdded, ...peopleCountingItemsUpdated];
   }
 
   private validateInput(schema: Joi.ObjectSchema, input: any): void {

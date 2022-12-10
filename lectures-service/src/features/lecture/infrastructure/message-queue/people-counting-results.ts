@@ -10,7 +10,7 @@ export const listenForPeopleCountingResults =
   (message: IncomingMessageQueueMessage<PeopleCountingResultInput>) => {
     console.log(message.data);
     lecturePhotoUseCase
-      .addPeopleCounting(message.data)
+      .addPeopleCountingResults(message.data)
       .then((value) => {
         myLogger.debug("added people counting result", value);
         message.ack();

@@ -15,8 +15,13 @@ export interface ILecturePhotoRepository {
   create(input: LecturePhotoCreateRepoData): Promise<LecturePhoto>;
   delete(lecture: Lecture, lecturePhoto: LecturePhoto): Promise<void>;
   getManyBy(lectureId: string): Promise<LecturePhoto[]>;
-  addPeopleCounting(
+  addPeopleCountingResult(
     lecture: Lecture,
     peopleCountingItems: PeopleCountingItem[]
   ): Promise<PeopleCountingItem[]>;
+  updatePeopleCountingItem(
+    lecture: Lecture,
+    peopleCountingItem: PeopleCountingItem,
+    newPeopleCountingItem: PeopleCountingItem
+  ): Promise<PeopleCountingItem>;
 }

@@ -47,11 +47,11 @@ export class LecturePhotoRepository implements ILecturePhotoRepository {
     });
   }
 
-  async addPeopleCounting(
+  async addPeopleCountingResult(
     lecture: Lecture,
     peopleCountingItems: PeopleCountingItem[]
   ): Promise<PeopleCountingItem[]> {
-    myLogger.debug("adding people counting to photo", {
+    myLogger.debug("adding people counting items to photo", {
       id: lecture.id,
       peopleCountingItems: peopleCountingItems,
     });
@@ -64,6 +64,33 @@ export class LecturePhotoRepository implements ILecturePhotoRepository {
       peopleCountingItems: peopleCountingItems,
     });
     return peopleCountingItems;
+  }
+
+  async updatePeopleCountingItem(
+    lecture: Lecture,
+    peopleCountingItem: PeopleCountingItem,
+    newPeopleCountingItem: PeopleCountingItem
+  ): Promise<PeopleCountingItem> {
+    myLogger.debug("updating people counting item", {
+      id: lecture.id,
+      peopleCountingItem,
+    });
+    await this.collection.updateOne(
+      {
+        _id: new ObjectId(lecture.id),
+        "peopleCountingItems.imageId": peopleCountingItem.imageId,
+      },
+      {
+        $set: {
+          "peopleCountingItems.$": newPeopleCountingItem,
+        },
+      }
+    );
+    myLogger.debug("people counting item updated", {
+      id: lecture.id,
+      newPeopleCountingItem,
+    });
+    return newPeopleCountingItem;
   }
 
   async getManyBy(lectureId: string): Promise<LecturePhoto[]> {
