@@ -11,15 +11,13 @@ export interface PeopleCountingResult {
 }
 
 export const PeopleCountingResultInputSchema = Joi.object({
-  data: Joi.object({
-    lectureId: Joi.string().required(),
-    peopleCountingItems: Joi.array()
-      .items(
-        Joi.object({
-          imageId: Joi.string().required(),
-          numberOfPeople: Joi.number().required(),
-        }).required()
-      )
-      .required(),
-  }).required(),
+  lectureId: Joi.string().required(),
+  peopleCountingItems: Joi.array()
+    .items(
+      Joi.object({
+        imageId: Joi.string().required(),
+        numberOfPeople: Joi.number().positive().allow(0).required(),
+      }).required()
+    )
+    .required(),
 }).meta({ className: "PeopleCountingResultInput" });

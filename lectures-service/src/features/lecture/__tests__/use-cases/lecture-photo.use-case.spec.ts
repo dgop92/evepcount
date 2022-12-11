@@ -182,12 +182,10 @@ describe("lecture-photo use-case", () => {
 
     it("should add people counting items to a lecture", async () => {
       await lecturePhotoUseCase.addPeopleCountingResults({
-        data: {
-          lectureId: lecture1.id,
-          peopleCountingItems: [
-            { imageId: lecturePhoto1.id, numberOfPeople: 10 },
-          ],
-        },
+        lectureId: lecture1.id,
+        peopleCountingItems: [
+          { imageId: lecturePhoto1.id, numberOfPeople: 10 },
+        ],
       });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
@@ -203,21 +201,17 @@ describe("lecture-photo use-case", () => {
     });
     it("should update people counting items of a lecture", async () => {
       await lecturePhotoUseCase.addPeopleCountingResults({
-        data: {
-          lectureId: lecture1.id,
-          peopleCountingItems: [
-            { imageId: lecturePhoto1.id, numberOfPeople: 10 },
-            { imageId: lecturePhoto2.id, numberOfPeople: 20 },
-          ],
-        },
+        lectureId: lecture1.id,
+        peopleCountingItems: [
+          { imageId: lecturePhoto1.id, numberOfPeople: 10 },
+          { imageId: lecturePhoto2.id, numberOfPeople: 20 },
+        ],
       });
       await lecturePhotoUseCase.addPeopleCountingResults({
-        data: {
-          lectureId: lecture1.id,
-          peopleCountingItems: [
-            { imageId: lecturePhoto1.id, numberOfPeople: 1000 },
-          ],
-        },
+        lectureId: lecture1.id,
+        peopleCountingItems: [
+          { imageId: lecturePhoto1.id, numberOfPeople: 1000 },
+        ],
       });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
@@ -235,22 +229,18 @@ describe("lecture-photo use-case", () => {
     });
     it("should update and create people counting items of a lecture", async () => {
       await lecturePhotoUseCase.addPeopleCountingResults({
-        data: {
-          lectureId: lecture1.id,
-          peopleCountingItems: [
-            { imageId: lecturePhoto1.id, numberOfPeople: 10 },
-          ],
-        },
+        lectureId: lecture1.id,
+        peopleCountingItems: [
+          { imageId: lecturePhoto1.id, numberOfPeople: 10 },
+        ],
       });
       await lecturePhotoUseCase.addPeopleCountingResults({
-        data: {
-          lectureId: lecture1.id,
-          peopleCountingItems: [
-            { imageId: lecturePhoto1.id, numberOfPeople: 1000 },
-            { imageId: lecturePhoto2.id, numberOfPeople: 20 },
-            { imageId: lecturePhoto3.id, numberOfPeople: 30 },
-          ],
-        },
+        lectureId: lecture1.id,
+        peopleCountingItems: [
+          { imageId: lecturePhoto1.id, numberOfPeople: 1000 },
+          { imageId: lecturePhoto2.id, numberOfPeople: 20 },
+          { imageId: lecturePhoto3.id, numberOfPeople: 30 },
+        ],
       });
       const lectureRetrieved = await lectureRepository.getOneBy({
         searchBy: { id: lecture1.id },
@@ -273,12 +263,10 @@ describe("lecture-photo use-case", () => {
     it("should throw an error if lecture doesn't exits", async () => {
       try {
         await lecturePhotoUseCase.addPeopleCountingResults({
-          data: {
-            lectureId: "11111111111aaaaabce4eaff",
-            peopleCountingItems: [
-              { imageId: lecturePhoto1.id, numberOfPeople: 10 },
-            ],
-          },
+          lectureId: "11111111111aaaaabce4eaff",
+          peopleCountingItems: [
+            { imageId: lecturePhoto1.id, numberOfPeople: 10 },
+          ],
         });
       } catch (error) {
         expect(error).toBeInstanceOf(ApplicationError);
@@ -290,12 +278,10 @@ describe("lecture-photo use-case", () => {
     it("should throw an error if a photo doesn't exits inside a lecture", async () => {
       try {
         await lecturePhotoUseCase.addPeopleCountingResults({
-          data: {
-            lectureId: lecture1.id,
-            peopleCountingItems: [
-              { imageId: "dumy_image_id", numberOfPeople: 10 },
-            ],
-          },
+          lectureId: lecture1.id,
+          peopleCountingItems: [
+            { imageId: "dumy_image_id", numberOfPeople: 10 },
+          ],
         });
       } catch (error) {
         expect(error).toBeInstanceOf(ApplicationError);

@@ -4,11 +4,9 @@
  */
 
 export interface PeopleCountingResultInput {
-  data: {
-    lectureId: string;
-    peopleCountingItems: {
-      imageId: string;
-      numberOfPeople: number;
-    }[];
-  };
+  lectureId: string;
+  peopleCountingItems: {
+    imageId: string;
+    numberOfPeople: number;
+  }[];
 }

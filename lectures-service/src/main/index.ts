@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { AppLogger } from "@common/logging/logger";
 import { WinstonLogger, createDevLogger } from "@common/logging/winston-logger";
 import { HttpAdapterHost, NestFactory } from "@nestjs/core";
-import { VersioningType } from "@nestjs/common";
+import { INestApplication, VersioningType } from "@nestjs/common";
 import { AppModule } from "./nest/app.module";
 import { AllExceptionsFilter } from "./nest/general-exception-filter";
 import { setupFactories } from "./setup-factories";
@@ -18,13 +18,15 @@ const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 
 myLogger.info("app logger created");
 
+let app: INestApplication;
+
 async function startApp() {
   const { mongoDatabase } = await getMongoDatabase();
   const { messageQueueClient } = await messageQueueClientFactory();
 
   setupFactories(mongoDatabase, messageQueueClient);
 
-  const app = await NestFactory.create(AppModule);
+  app = await NestFactory.create(AppModule);
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
   app.setGlobalPrefix("api");
@@ -44,6 +46,10 @@ function closeServices() {
     closeMongoConnection();
     myLogger.info("closing amqp connection");
     closeAmqpClient();
+    if (app) {
+      myLogger.info("closing http server");
+      app.close();
+    }
   } catch (error) {
     myLogger.error("error closing services", { error });
   }
@@ -59,18 +65,24 @@ process.on("unhandledRejection", (reason, promise) => {
 
 process.on("uncaughtException", (err) => {
   myLogger.error("uncaught exception, node process will finish", { err });
+  myLogger.info("cleaning up services");
+  closeServices();
   process.exitCode = 1;
 });
 
 process.on("SIGINT", function () {
+  myLogger.info("cleaning up services");
+  closeServices();
   process.exit(2);
 });
 
 process.on("exit", function () {
   // NOTE: this will be called when the node process finishes,
   // either because of an error or because of a normal exit
-  myLogger.info("node process will exit, cleaning up services");
-  closeServices();
+  // cannot clenaup services here because if the error happens and
+  // one service is still running this event will never be called
+  // Example mongo db connections is still open but rabbitmq fail to connect
+  myLogger.info("node process will exit");
 });
 
 startApp()
@@ -82,4 +94,6 @@ startApp()
     // we can call them boot errors
     myLogger.error("app failed to start, node process will finish", { err });
     process.exitCode = 1;
+    myLogger.info("cleaning up services");
+    closeServices();
   });

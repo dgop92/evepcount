@@ -8,7 +8,6 @@ const myLogger = AppLogger.getAppLogger().createFileLogger(__filename);
 export const listenForPeopleCountingResults =
   (lecturePhotoUseCase: ILecturePhotoUseCase) =>
   (message: IncomingMessageQueueMessage<PeopleCountingResultInput>) => {
-    console.log(message.data);
     lecturePhotoUseCase
       .addPeopleCountingResults(message.data)
       .then((value) => {
@@ -17,5 +16,6 @@ export const listenForPeopleCountingResults =
       })
       .catch((err) => {
         myLogger.error("could not add people counting result", err);
+        message.ack();
       });
   };

@@ -149,7 +149,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
   ): Promise<PeopleCountingItem[]> {
     this.validateInput(PeopleCountingResultInputSchema, input);
 
-    const lectureId = input.data.lectureId;
+    const lectureId = input.lectureId;
     myLogger.debug("getting lecture", {
       lectureId,
     });
@@ -161,7 +161,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
       throw new ApplicationError("lecture not found", ErrorCode.NOT_FOUND);
     }
     const lecturePhotoImageIds = lecture.photos!.map((p) => p.id);
-    const inputPeopleCountingItemsImageIds = input.data.peopleCountingItems.map(
+    const inputPeopleCountingItemsImageIds = input.peopleCountingItems.map(
       (p) => p.imageId
     );
     const imageIdsNotBelongingToLecture =
@@ -181,7 +181,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
     const lecturePeopleCountingItemImageIds = lecture.peopleCountingItems!.map(
       (p) => p.imageId
     );
-    const peopleCountingItemsToBeAdded = input.data.peopleCountingItems.filter(
+    const peopleCountingItemsToBeAdded = input.peopleCountingItems.filter(
       (p) => !lecturePeopleCountingItemImageIds.includes(p.imageId)
     );
 
@@ -190,7 +190,7 @@ export class LecturePhotoUseCase implements ILecturePhotoUseCase {
       newPeopleCountingItem: PeopleCountingItem;
     }[] = [];
 
-    input.data.peopleCountingItems.forEach((newPeopleCountingItem) => {
+    input.peopleCountingItems.forEach((newPeopleCountingItem) => {
       const oldPeopleCountingItem = lecture.peopleCountingItems!.find(
         (p) => p.imageId === newPeopleCountingItem.imageId
       );
