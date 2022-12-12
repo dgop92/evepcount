@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import time
 
 import numpy.typing as npt
 
@@ -15,4 +16,5 @@ class HOGFaceDetection:
         """
         # TODO: Implement this method, so far is just a placeholder
         count = imageAsArray.shape[0]
+        time.sleep(5)
         return [(0, 0, count, count) for _ in range(count)]

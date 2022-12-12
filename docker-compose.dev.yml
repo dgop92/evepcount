@@ -1,0 +1,33 @@
+version: "3.1"
+
+networks:
+  main_network:
+    name: main_network
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./container_files/env-vars/rabbitmq.dev.env
+    networks:
+      - main_network
+
+  people_counting_service:
+    container_name: people_counting_service_container
+    build:
+      context: ./people-counting-service
+    restart: "no"
+    env_file:
+      - ./people-counting-service/container_files/env-vars/.dev.env
+    networks:
+      - main_network
+    command:
+      - python
+      - main.py
+    depends_on:
+      - rabbitmq
