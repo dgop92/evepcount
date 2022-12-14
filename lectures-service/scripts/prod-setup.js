@@ -1,4 +1,8 @@
-require("dotenv").config({ path: "./env-vars/.prod.env" });
+try {
+  // For production environments where dotenv is not installed.
+  // Example: Docker
+  require("dotenv").config({ path: "./env-vars/.prod.env" });
+} catch (error) {}
 const tsConfig = require("../tsconfig.json");
 const tsConfigPaths = require("tsconfig-paths");
 
