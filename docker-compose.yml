@@ -13,7 +13,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     env_file:
-      - ./container_files/env-vars/rabbitmq.dev.env
+      - ./container_files/env-vars/.rabbitmq.prod.env
     networks:
       - main_network
 
@@ -23,11 +23,30 @@ services:
       context: ./people-counting-service
     restart: "no"
     env_file:
-      - ./people-counting-service/container_files/env-vars/.dev.env
+      - ./people-counting-service/container_files/env-vars/.prod.env
     networks:
       - main_network
     command:
       - python
       - main.py
+    depends_on:
+      - rabbitmq
+  
+  lectures_service:
+    container_name: lectures_service_container
+    ports:
+      - "8000:8000"
+    build:
+      context: ./lectures-service
+    restart: "on-failure:5"
+    env_file:
+      - ./lectures-service/env-vars/.prod.env
+    networks:
+      - main_network
+    command:
+      - node
+      - -r
+      - ./scripts/prod-setup.js
+      - dist/main/index.js
     depends_on:
       - rabbitmq
