@@ -13,5 +13,5 @@ class ImageTransformer:
         """
         response = requests.get(url)
         bytes_im = io.BytesIO(response.content)
-        image = Image.open(bytes_im)
+        image = Image.open(bytes_im).convert("RGB")
         return np.array(image)

@@ -4,7 +4,7 @@ evepcount is a lecture and events people counting system. Using the application 
 
 ## Motivation
 
-My main motivation was building a project to learn message queues. I picked a people counting system because AI services are not instantaneous and take some time to process and return a response. Note: I have not implemented the component of counting people in images (Working in progress)
+My main motivation was building a project to learn message queues. I picked a people counting system because AI services are not instantaneous and take some time to process and return a response. Note: The implementation of counting people in images is just a simple HOG face recognition algorithm
 
 ## Run App
 

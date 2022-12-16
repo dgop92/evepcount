@@ -1,6 +1,6 @@
 from typing import List, Tuple
-import time
 
+import face_recognition
 import numpy.typing as npt
 
 
@@ -14,7 +14,9 @@ class HOGFaceDetection:
 
         Each tuple contains the coordinates of the top, right, bottom, and left
         """
-        # TODO: Implement this method, so far is just a placeholder
-        count = imageAsArray.shape[0]
-        time.sleep(5)
-        return [(0, 0, count, count) for _ in range(count)]
+        face_locations = face_recognition.face_locations(
+            imageAsArray,
+            model="hog",
+            number_of_times_to_upsample=2,
+        )
+        return face_locations
